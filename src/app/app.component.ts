@@ -9,7 +9,7 @@ import { Todo } from 'src/models/todo.model';
 })
 export class AppComponent {
   public todos: Todo[] = []; // -> vazio  //public todos: any[]; -> undefined
-  public title: String = 'Minhas Tarefas';
+  public title: String = 'My Tasks';
   public form: FormGroup;
 
   constructor(private fb: FormBuilder) {
@@ -20,9 +20,19 @@ export class AppComponent {
         Validators.required,
       ])]
     });
-    this.todos.push(new Todo(1, 'Passear cachorro', false));
-    this.todos.push(new Todo(2, 'Cortar cabelo', true));
-    this.todos.push(new Todo(3, 'Ir ao mercado', false));
+    this.load();
+  }
+
+  add() {
+    const title = this.form.controls['title'].value;
+    const id = this.todos.length + 1;
+    this.todos.push(new Todo(id, title, false));
+    this.save();
+    this.clear();
+  }
+
+  clear() {
+    this.form.reset();
   }
 
   remove(todo: Todo) {
@@ -30,14 +40,30 @@ export class AppComponent {
     if (index !== -1) {
       this.todos.splice(index, 1);
     }
+    this.save();
   }
 
   markAsDone(todo: Todo) {
     todo.done = true;
+    this.save();
   }
 
   markAsUndone(todo: Todo) {
     todo.done = false;
+    this.save();
   }
 
+  save() {
+    const data = JSON.stringify(this.todos);
+    localStorage.setItem('todos', data);
+  }
+
+  load() {
+    const data = localStorage.getItem('todos');
+    if (data) {
+    this.todos = JSON.parse(data);
+    }else {
+      this.todos = [];
+    }
+  }
 }
